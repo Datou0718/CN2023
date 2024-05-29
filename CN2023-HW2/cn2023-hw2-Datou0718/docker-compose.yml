@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+  main:
+    image: exodustw/cn-hw2:latest # build: .
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "2222:22"
+      - "8080:8080"
+    environment:
+      - EDITOR=vim
+    volumes:
+      - ./:/home/cn/hw2
+    privileged: true
+    networks:
+        default:
+
+networks:
+    default:

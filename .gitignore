@@ -1,0 +1,8 @@
+.DS_Store
+*.zip
+.vscode
+slides/
+*.pcapng
+*test*
+__pycache__/
+*.mp4

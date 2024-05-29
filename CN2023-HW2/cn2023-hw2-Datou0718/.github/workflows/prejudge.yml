@@ -1,0 +1,69 @@
+name: cn2023-hw2-prejudge
+run-name: ${{ github.repository_owner }} HW2 Prejudge
+on:
+  push:
+    branches:
+      - main
+jobs:
+  structure-check:
+    runs-on: arc-runner-set
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10' 
+      - run: python .testcase/structure-checker.py
+  server-test:
+    runs-on: arc-runner-set
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - run: sudo apt update
+      - run: sudo apt install -y gcc g++ make
+      - run: gcc -v
+      - run: cp .testcase/assets/secret hw2
+      - run: cd hw2 && make
+      - run: cd hw2 && ./server 8080 &
+      - run: cd .testcase && python server-0.py 8080
+      - run: cd hw2 && ./server 7777 &
+      - run: cd .testcase && python server-1.py 7777
+  client-test:
+    runs-on: arc-runner-set
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 10.19.0
+          cache: 'npm'
+          cache-dependency-path: .testcase/assets/pseudo-server/package-lock.json
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10' 
+      - run: sudo apt update
+      - run: sudo apt install -y gcc g++ make
+      - run: gcc -v
+      - run: cd hw2 && make
+      - run: pip install pwntools
+      - run: cd .testcase/assets/pseudo-server && npm ci && node app.js &
+      - run: cd .testcase && python client-0.py
+      - run: cd .testcase && python client-1.py
+  client-test-with-odd-server:
+    runs-on: arc-runner-set
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10' 
+      - run: sudo apt update
+      - run: sudo apt install -y gcc g++ make
+      - run: gcc -v
+      - run: cd hw2 && make
+      - run: pip install Flask Flask-HTTPAuth pwntools
+      - run: cd .testcase/assets/pseudo-server && python web.py &
+      - run: cd .testcase && python client-0.py
